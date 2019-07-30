@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import ru.lember.rosguards.battlefield.Statistics;
-import ru.lember.rosguards.battlefield.Status;
+import ru.lember.rosguards.battlefield.Battlefield;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,20 +17,16 @@ public class PeoplesFactory {
     @Value("${people.maxAmount}")
     private Integer maxAmount;
 
-//    @Value("${people.rateMs}")
-//    private Integer rateMs;
-
     @Value("${people.increasingAmount}")
     private Integer increasingAmount;
 
     private AtomicInteger peoplesNumber = new AtomicInteger(0);
 
-
-    private final Statistics statistics;
+    private final Battlefield battlefield;
 
     @Autowired
-    public PeoplesFactory(Statistics statistics) {
-        this.statistics = statistics;
+    public PeoplesFactory(Battlefield battlefield) {
+        this.battlefield = battlefield;
     }
 
     @PostConstruct
@@ -44,32 +39,18 @@ public class PeoplesFactory {
 
     @Scheduled(
             initialDelay = 1000L,
-            fixedDelayString = "${people.increasingAmount}")
+            fixedDelayString = "${people.rateMs}")
     private void increasePeopleAmount() {
 
-        log.info("increasePeopleAmount. peoplesNumber: {}", peoplesNumber);
-
-        peoplesNumber.addAndGet(increasingAmount);
-
-
-    }
-
-    private Status getActualStatus() {
-
-        if (statistics.getStatus() == Status.GAME_OVER) {
-            return Status.GAME_OVER;
-        } else if (statistics.getStatus() == Status.TRIUMPH) {
-            return Status.TRIUMPH;
-        }
-
-
         if (peoplesNumber.get() >= maxAmount) {
-            return Status.TRIUMPH;
-        } else if (!statistics.anySpaceLeft()) {
-            return Status.GAME_OVER;
-        } else {
-            return Status.FIGHTING;
-        }
+        	log.info("increasePeopleAmount. can't increase people anymore. All people are already in the streets");
+		} else if (!battlefield.anySpaceLeft()) {
+			log.debug("increasePeopleAmount. Streets are full! No need to go out anymore! Total peoplesNumber: {}/{}", peoplesNumber, maxAmount);
+		} else {
+			log.info("increasePeopleAmount. total peoplesNumber: {}/{}", peoplesNumber, maxAmount);
+			peoplesNumber.addAndGet(increasingAmount);
+			battlefield.addPeopleToStreets(increasingAmount);
+		}
 
     }
 
