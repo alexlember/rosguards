@@ -1,0 +1,31 @@
+Узнать статус: GET http://localhost:8080/status
+Пример ответа:
+{
+    "status": "Уличные протесты в процессе, нужно больше автозаков!",
+    "maxAmountInTheStreet": 5000,
+    "streets": [
+        {
+            "name": "Сахарова",
+            "peopleAmount": 2350
+        },
+        {
+            "name": "Болотная",
+            "peopleAmount": 2250
+        },
+        {
+            "name": "Тверская",
+            "peopleAmount": 2150
+        }
+    ]
+}
+
+
+Послать автозак: POST http://localhost:8080/prisonCar
+[{"key":"Content-Type","value":"application/json","description":""}]
+Body:
+{
+	"streetName" : "Тверская"
+}
+
+Пример ответа:
+Улица Тверская уже заполнена людьми! Автозаки не смогли проехать!
